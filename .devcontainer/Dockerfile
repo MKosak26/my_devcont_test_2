@@ -36,6 +36,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     unzip \
     wget \
     zip \
+    nano \
     && \
     rm -rf /var/lib/apt/lists/*
 
@@ -51,3 +52,7 @@ RUN \
     canmatrix[xls]
     
 RUN ln -s /usr/bin/gdb-multiarch /usr/bin/arm-none-eabi-gdb
+
+
+# Source file mora biti tamo gdje i Dockerfile (unutar .devcontainers) da bi se mogla dodati datoteka !
+ADD datoteke_za_u_image /root/home/datoteke_za_u_image
