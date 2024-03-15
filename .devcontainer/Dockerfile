@@ -53,6 +53,8 @@ RUN \
     
 RUN ln -s /usr/bin/gdb-multiarch /usr/bin/arm-none-eabi-gdb
 
+RUN mkdir -p /root/home/my_work/
 
 # Source file mora biti tamo gdje i Dockerfile (unutar .devcontainers) da bi se mogla dodati datoteka !
+# Absoluth path isto NIJE podržan !
 ADD datoteke_za_u_image /root/home/datoteke_za_u_image

@@ -3,9 +3,11 @@
 {
 	"name": "Custom Ubuntu",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"build": {
-        "dockerfile": "Dockerfile"
-    },
+    "dockerComposeFile": [
+        "../docker-compose.yml"
+    ],
+    "service": "devcontainer",
+    "workspaceFolder": "/root/home/my_work/",  // Path u samom container-ugdje se mount-aju podaci
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
