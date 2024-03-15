@@ -1,0 +1,95 @@
+Docker MOUNT i COPY/ADD su dva različita pojma !!!!! COPY/ADD dodaje file-ove u sam image koji se stvori što znači da svi developeri imaju iste file-ove ako imaju isti image-što je slučaj, 
+dokle mount je zapravo mount-anje file-ova (Github repo-a) na taj docker odnosno na njegovo okruženje, ali oni nisu u tom docker image-u već su samo bind-ani
+
+Image radim na temelju Dockerfile-a, a iz image radim container-e i to mogu više container-a iz jednog image-a, kao i više image-a iz Dockerfile-a
+
+Vrijedi samo ako se koristi Docker Compose (najčešće se koristi za jednostavno mount-anje file-ova):
+VSCode može sam, automatski, iz image-a napraviti container !!! (ime dobiva na temelju yml file-a pretpostavljam), ako se pak želi napraviti container preko CLI-a
+onda je bitno napomenuti da se to NE radi preko "docker" naredbe, nego preko "docker-compose" naredbe jer je ta naredba baš za .yml file-ove koji onda grade cijeli sustav dalje
+
+Kada se izbriše Docker Image i ponovo napravi ISTI (iz ISTOG DockerFile-a), onda se zapravo taj image napravi iz cache-a i jako brzo.
+Ako se to ne želi, onda je potrebno u CLI naredbama (kod "build" naredbe) dodati "--no-cache".
+
+
+
+yml file (iz Docker Compose) ima neke property-e iste kao i DockerFile, kao primjerice "working_dir" dokle s druge strane DockerFile ima WORKDIR. 
+Ako postoje oba property-a postavljena, onda "working_dir" iz yml file-a overwrite-a WORKDIR, da li ?
+A i JSON ima property "workspaceFolder", neznam koji ima najveći prioritet !??!
+
+ChatGPT:
+In Docker, what is the diference between property "workspaceFolder" in devcontainer.json, "WORKDIR" in Dockerfile and "working_dir" in docker-compose.yml file used in Docker compose?
+What if I define every one of them, are they overwritten by each other or how it does work ?
+
+The properties "workspaceFolder" in .devcontainer.json, "WORKDIR" in Dockerfile, and "working_dir" in docker-compose.yml serve similar purposes but are used in different contexts within the Docker ecosystem.
+workspaceFolder in devcontainer.json: This property is specific to Visual Studio Code's Remote - Containers extension. It defines the path inside the container where the VS Code workspace will be mounted. It helps in setting up a development environment within a Docker container seamlessly.
+WORKDIR in Dockerfile: WORKDIR is an instruction in a Dockerfile that sets the working directory for any subsequent instructions in the Dockerfile. It defines the directory within the container where commands will be executed by default unless otherwise specified. This is important for ensuring that files are copied, commands are executed, and services are run in the correct directory.
+working_dir in docker-compose.yml: This property sets the working directory for services defined in a Docker Compose file. It is used to specify the directory in which the command should be run for a particular service.
+
+If you define all three of them, the behavior will depend on the context:
+If you're using Visual Studio Code's Remote - Containers extension, the workspaceFolder in .devcontainer.json will take precedence for setting up the workspace within the container specifically for VS Code.
+When building the Docker image using a Dockerfile, the WORKDIR instruction in the Dockerfile will determine the default working directory inside the container during the image build process.
+When running services using Docker Compose, the working_dir in the docker-compose.yml file will determine the working directory for each service during runtime.
+There's no direct overwrite happening between these settings because they operate at different stages or levels within the Docker environment. Each serves its purpose within its respective context, helping to manage the workspace, image build, and service runtime environments effectively.
+
+
+
+CLI naredbe:
+
+IMAGES
+###############################
+docker images -a  -> all images and status
+###############################
+docker build -t IMAGE_REPO .devcontainer/   [IMAGE_REPO -> dajem mu ime, proizvoljno, isto kao i tag]
+###############################
+docker rmi IMAGE_REPO
+###############################
+docker tag OLD_IMAGE_REPO  NEW_IMAGE_REPO -> zapravo napravi se kopija image-a. git tag "staro" "novo:2.2" -> Repo ime je "novo", a tag je "2.2"
+###############################
+docker run --name CONT_NAME -it IMAGE_REPO -> prelazi iz repo image u containers i odmah ga runna i otvara shell
+																					    -> dajem mu CONT_NAME, ako ne, on ga sam izmisli
+																					    -> izlaskom iz konzole se stopira container
+																					    -> postoji i "--mount " opcije, ali se rađe koristi docker-compose.yml za mount-ati volume
+docker run --name CONT_NAME -idt IMAGE_REPO -> prelazi iz repo image u containers, ali nije running
+																					    -> dajem mu CONT_NAME, ako ne, on ga sam izmisli
+###############################
+docker system prune --all -> izbriše i očisti sve !!!
+###############################
+
+
+CONTAINERS
+###############################
+docker ps -q -l -> vraća container ID
+docker ps -a -> currently running containers
+docker inspect --type container CONTAINER_ID/CONT_NAME -> detalji o tom containeru !
+###############################
+docker commit  CONTAINER_ID/CONT_NAME  NEW_IMAGE_NAME  -> postojeci container, unutar kojeg su napravljene izmjene, kao pr. kreirani dodatni file-ovi, se sprema kao image od kojeg se moze raditi vise container-a sa tim file-ovima unutra
+###############################
+docker rm CONTAINER_ID/CONT_NAME
+###############################
+docker start CONTAINER_ID/CONT_NAME         -> pokretanje container-a
+docker stop CONTAINER_ID/CONT_NAME			-> zaustavljanje container-a
+###############################
+docker exec -it CONTAINER_ID/CONT_NAME /bin/bash    -> attachanje na container koji je run
+docker attach CONTAINER_ID/CONT_NAME                -> isto attachanje, neznam koja je razlika između "exec" i "attach" (vrlo slično, ali i različito). Ja koristim attach
+###############################
+
+
+COMPOSE
+##########################################
+docker-compose -f YML_FILE bulild   -> stvara image na temelju yml file-a
+docker-compose -f YML_FILE up -d    -> stvara container i pokrece ga na temelju yml file-a (ako nema image-a, prijašnja komanda nije izvršena, onda i image stvara ali baci warning)
+
+
+
+PRIMJER za projekt pokrenuti:
+##########################################
+# Normalno
+docker build -t IMAGE_REPO .devcontainer/ 
+docker run --name CONT_NAME -idt IMAGE_REPO
+docker attach CONTAINER_ID/CONT_NAME 
+(ako je container zaustavljen onda prvo ide naredba "docker start CONTAINER_ID/CONT_NAME", pa onda attach)
+
+# Sa Docker Compose
+docker-compose -f YML_FILE bulild
+docker-compose -f YML_FILE up -d
+

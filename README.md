@@ -1,5 +1,6 @@
 # my_devcont_test_2
-New test for dev containers
+This is a testing repo for Docker containers and Docker compose.
+This environment is setup so that it can be easly tested.
+Here the difference of using devcontainer.json, Dockerfile and docker-compose.yml is visible.
 
-
-## This is a test !
+Read docker.txt for more info about everything (is written in Croatian)
