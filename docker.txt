@@ -3,9 +3,10 @@ dokle mount je zapravo mount-anje file-ova (Github repo-a) na taj docker odnosno
 
 Image radim na temelju Dockerfile-a, a iz image radim container-e i to mogu više container-a iz jednog image-a, kao i više image-a iz Dockerfile-a
 
-Vrijedi samo ako se koristi Docker Compose (najčešće se koristi za jednostavno mount-anje file-ova):
-VSCode može sam, automatski, iz image-a napraviti container !!! (ime dobiva na temelju yml file-a pretpostavljam), ako se pak želi napraviti container preko CLI-a
+VSCode može sam, automatski, iz devcontainer.json napraviti image i container !!! (ime image-a i container-a dobiva na temelju yml file-a pretpostavljam), ako se pak želi napraviti container preko CLI-a
 onda je bitno napomenuti da se to NE radi preko "docker" naredbe, nego preko "docker-compose" naredbe jer je ta naredba baš za .yml file-ove koji onda grade cijeli sustav dalje
+dovcontainer.json je zapravo file za VSCode baš i onda VSCode poziva yml file i onda preko yml file-a se poziva Dockerfile, dokle kada se ide preko CLI-a (dakle nemamo VSCode), onda se
+ide preko "docker-compose" naredbe i poziva se direkt taj yml file
 
 Kada se izbriše Docker Image i ponovo napravi ISTI (iz ISTOG DockerFile-a), onda se zapravo taj image napravi iz cache-a i jako brzo.
 Ako se to ne želi, onda je potrebno u CLI naredbama (kod "build" naredbe) dodati "--no-cache".
